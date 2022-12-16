@@ -1,0 +1,45 @@
+import os
+import spotipy
+import spotipy.util as util
+
+# Set the client ID, client secret, and redirect URI
+client_id = os.environ['SPOTIPY_CLIENT_ID']
+client_secret = os.environ['SPOTIPY_CLIENT_SECRET']
+redirect_uri = os.environ['SPOTIPY_REDIRECT_URI']
+
+# Create a SpotifyOAuth object
+spotify_oauth = spotipy.oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri)
+
+# Get the authorization URL
+auth_url = spotify_oauth.get_authorize_url()
+
+# Redirect the user to the authorization URL
+# This will send the user to the Spotify Web Authentication page
+return redirect(auth_url)
+
+import React from 'react';
+import { Redirect } from 'react-router-dom';
+
+function LoginButton() {
+  // Set the client ID, client secret, and redirect URI
+  const clientId = process.env.REACT_APP_SPOTIPY_CLIENT_ID;
+  const redirectUri = process.env.REACT_APP_SPOTIPY_REDIRECT_URI;
+  const scope = 'user-read-private user-read-email';
+
+  // Build the authorization URL
+  const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}`;
+
+  // Redirect the user to the authorization URL when the button is clicked
+  const handleClick = () => {
+    window.location.href = authUrl;
+  };
+
+  return (
+    <button onClick={handleClick}>
+      Login with Spotify
+    </button>
+  );
+}
+
+export default LoginButton;
+
