@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, redirect
+from flask import Flask, jsonify, redirect, request
 from flask_cors import CORS
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -23,6 +23,12 @@ def authenticate_user():
     spotipy_oauth = spotipy.oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri)
     auth_url = spotipy_oauth.get_authorize_url()
     return jsonify({'url': auth_url})
+
+@app.route('/callback')
+def callback():
+    code = request.args.get('code')
+    print(code)
+    return 'handled'
 
 if __name__ == '__main__':
     app.run(host='localhost', port=5000)
