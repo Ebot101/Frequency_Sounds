@@ -35,8 +35,10 @@ def authenticate_user():
 @app.route('/callback')
 def callback():
     
+    # gets access token from spotify api
     sp_oauth = spotipy.oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri, scope=scopes)
     session.clear()
+    # gets code from query string
     code = request.args.get('code')
     token_info = sp_oauth.get_access_token(code)
     # Saving the access token along with all other token related info
@@ -46,8 +48,11 @@ def callback():
 # gets recently played songs
 @app.route('/recently-played', methods=['GET'])
 def recently_played():
+    # sp gets the spotipy api object with the spotify client credentials which are the client id and client secret
     sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+    # gets recently played songs
     results = sp.current_user_recently_played(limit=20)
+    # returns results so that it can be used in the react app.
     return jsonify(results)
     
 
