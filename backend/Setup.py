@@ -58,18 +58,3 @@ def recently_played():
 
 if __name__ == '__main__':
     app.run(host='localhost', port=5000, debug=True)
-
-# @app.route('/recently-played', methods=['GET'])
-# def recently_played():
-#     # gets recently played songs
-#     results = sp.current_user_recently_played()
-#     return results
-
-# # @app.route('/top-tracks', methods=['GET'])
-# def top_tracks(term = None):
-#     # gets top tracks
-#     results = sp.current_user_top_tracks(time_range=term)
-#     return results
-    
-
-# print(recently_played())
