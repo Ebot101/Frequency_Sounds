@@ -4,14 +4,15 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import os
 from dotenv import load_dotenv
-import sqlite3
-import spotipy.util as util
+import time
 
 # load environment variables
 load_dotenv()
 
 # run flask app and set up cors
 app = Flask(__name__)
+# generate random secret key
+app.secret_key = os.urandom(24)
 CORS(app)
 
 # sets up user credentials for spotify api
@@ -19,30 +20,39 @@ client_id = os.getenv("SPOTIFY_CLIENT_ID")
 client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
 redirect_uri = os.getenv("SPOTIFY_REDIRECT_URI")
 
-# sets up spotify client credentials manager
-client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+# get all scopes
+scopes = 'user-read-recently-played user-top-read user-read-currently-playing user-read-playback-state user-library-read streaming'
 
 # authenticates user and sends react app to url
 @app.route('/authenticate', methods=['GET'])
 def authenticate_user():
-    spotipy_oauth = spotipy.oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri)
-    auth_url = spotipy_oauth.get_authorize_url()
+    sp_oauth = spotipy.oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri, scope=scopes, show_dialog=True)
+    auth_url = sp_oauth.get_authorize_url()
     return jsonify({'url': auth_url})
 
 # gets access token from spotify api
 @app.route('/callback')
 def callback():
+    
+    sp_oauth = spotipy.oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri, scope=scopes)
+    session.clear()
     code = request.args.get('code')
-    sp_oauth = spotipy.oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri)
     token_info = sp_oauth.get_access_token(code)
-    access_token = token_info['access_token']
-    sp = spotipy.Spotify(auth=access_token)
-    session['access_token'] = access_token
+    # Saving the access token along with all other token related info
+    session['token_info'] = token_info
     return redirect('http://localhost:3000/')
 
+# gets recently played songs
+@app.route('/recently-played', methods=['GET'])
+def recently_played():
+    sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+    results = sp.current_user_recently_played(limit=20)
+    return jsonify(results)
+    
+
 if __name__ == '__main__':
-    app.run(host='localhost', port=5000)
+    app.run(host='localhost', port=5000, debug=True)
 
 # @app.route('/recently-played', methods=['GET'])
 # def recently_played():
